@@ -11,7 +11,10 @@ run_user(UserID, [UserName, Mode, _Unused, Real | _Rest]) ->
             #ircuser{user = nil, host = nil, real = nil, nick = Nick} ->
                 Socket = user_socket:get_socket(UserID),
                 Host = get_host(Socket, UserName),
-                ModeInt = list_to_integer(Mode),
+                ModeInt = case (catch list_to_integer(Mode)) of
+                    N when is_integer(N) -> N;
+                    _ -> 0
+                end,
                 Modes = case {ModeInt band 2 == 2, ModeInt band 4 == 4} of
                     {true, true} -> "iw";
                     {true, false} -> "i";
