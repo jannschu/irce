@@ -8,8 +8,13 @@ run_user(UserID, []) ->
     user_socket:send_message(UserID, ?ERR_NEEDMOREPARAMS(?TARGET(UserID), "JOIN"));
 
 run_user(UserID, ["0"]) ->
-    %% TOOO: implement
-    ok;
+    case ircchannels:get_channel_with_user(UserID) of
+        {ok, Channels} ->
+            lists:foreach(fun(Channel) ->
+                part_command:run_user(UserID, [Channel, "Leaving all channels"])
+            end, Channels);
+        {error, _} -> ok
+    end;
 
 run_user(UserID, [Channels]) ->
     run_user(UserID, [Channels, ""]);

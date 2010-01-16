@@ -4,6 +4,7 @@ get_channel_with_user/1,
     get_channel_modes/1,
        get_user_modes/2,
           get_channel/1,
+            user_part/2,
             user_quit/1]).
 
 % -export([join/2, part/2, part/3, privmsg/3]).
@@ -34,6 +35,10 @@ join(UserID, Channel) ->
 %% The user leaves all channels
 user_quit(UserID) ->
     gen_server:cast(?MODULE, {user_quit, UserID}).
+
+user_part(UserID, ChannelName) ->
+    gen_server:cast(?MODULE, {user_part, UserID, ChannelName}).
+
 % 
 % part(UserID, Channel) ->
 %     gen_server:cast(?MODULE, {user_part, UserID, Channel, nil}).
@@ -119,6 +124,10 @@ handle_call({user_join, UserID, ChannelNameCaseIns}, _From, Refs) ->
     {reply, {ok, ChannelWithUser, UserModes}, NewRef}.
 
 % asynchronous
+handle_cast({user_part, UserID, ChannelName}, State) ->
+    remove_user_from_channel(UserID, ChannelName),
+    {noreply, State};
+
 handle_cast({user_quit, UserID}, Refs) ->
     NewRefs = demonitor_user(UserID, Refs),
     {ok, Channels} = read_channels_with_user(UserID),

@@ -17,6 +17,7 @@ run_user(UserID, [ChannelName, Msg]) ->
         {ok, #ircchannel{users = Users}} ->
             case dict:is_key(UserID, Users) of
                 true ->
+                    ircchannels:user_part(UserID, ChannelName),
                     broadcast_part(User, dict:fetch_keys(Users), ChannelName, Msg);
                 false ->
                     user_socket:send_message(UserID, ?ERR_NOTONCHANNEL(Target, ChannelName))
