@@ -3,18 +3,7 @@
 
 -include("ircuser.hrl").
 
-sanitize_nick(nil) -> "*";
-sanitize_nick("") -> "*";
-sanitize_nick([$: | Rest]) -> sanitize_nick([$* | Rest]);
-
-sanitize_nick(Nick) ->
-    case string:chr(Nick, $ ) of
-        0 -> Nick;
-        N ->
-            {A, B} = lists:split(N - 1, Nick),
-            sanitize_nick(A ++ [$_ | tl(B)])
-    end.
-
+sanitize_nick(A) -> misc:sanitize_msg_param(A).
 
 rpl_target(UserID) ->
     case ircusers:get(UserID) of

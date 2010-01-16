@@ -20,20 +20,26 @@ run_user(UserID, [Chans, _Ks]) ->
 
 join_channel(UserID, ChannelName) ->
     %% TODO: everything
-    {ok, Channel, _UserModes} = ircchannels:join(UserID, ChannelName),
-    {ok, JoiningUser} = ircusers:get(UserID),
-    Target = JoiningUser#ircuser.nick,
-    ChannelTopic = Channel#ircchannel.topic,
-    ChannelName = Channel#ircchannel.name,
-    case ChannelTopic of
-        nil ->
-            user_socket:send_message(UserID, ?RPL_NOTOPIC(Target, ChannelName));
-        _ ->
-            user_socket:send_message(UserID, ?RPL_TOPIC(Target, ChannelName, ChannelTopic))
-    end,
-    %user_socket:send_message(UserID, ?RPL("MODE", [[$+|Modes]])),
-    UserInChannel = dict:fetch_keys(Channel#ircchannel.users),
-    send_names(Channel, JoiningUser, UserInChannel, []).
+    case is_valid_channel_name(ChannelName) of
+        false ->
+            Msg = ?ERR_NOSUCHCHANNEL(?TARGET(UserID), misc:sanitize_msg_param(ChannelName)),
+            user_socket:send_message(UserID, Msg);
+        true ->
+            {ok, Channel, _UserModes} = ircchannels:join(UserID, ChannelName),
+            {ok, JoiningUser} = ircusers:get(UserID),
+            Target = JoiningUser#ircuser.nick,
+            ChannelTopic = Channel#ircchannel.topic,
+            ChannelName = Channel#ircchannel.name,
+            case ChannelTopic of
+                nil ->
+                    user_socket:send_message(UserID, ?RPL_NOTOPIC(Target, ChannelName));
+                _ ->
+                    user_socket:send_message(UserID, ?RPL_TOPIC(Target, ChannelName, ChannelTopic))
+            end,
+            %user_socket:send_message(UserID, ?RPL("MODE", [[$+|Modes]])),
+            UserInChannel = dict:fetch_keys(Channel#ircchannel.users),
+            send_names(Channel, JoiningUser, UserInChannel, [])
+    end.
 
 % send if reply has more than 370 chars
 send_names(Channel, JoinUser, UserList, Sum) when length(Sum) >= 370 ->
@@ -105,4 +111,9 @@ has_mode(Mode, Modes) ->
         0 -> false;
         _ -> true
     end.
-    
+
+is_valid_channel_name(Name) ->
+    case Name of
+        [$#|Channel] -> string:span(Channel, [$ , 7, $,, $:]) == 0;
+        _ -> false
+    end.
