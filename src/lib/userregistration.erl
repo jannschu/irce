@@ -5,9 +5,8 @@
 
 for_user(#ircuser{user = User, host = UserHost, nick = Nick, socket_process = UserID}) ->
     user_socket:send_message(UserID, ?RPL_WELCOME(Nick, Nick, User, UserHost)),
-    {ok, MyHost} = inet:gethostname(),
     {ok, Version} = application:get_key(vsn),
-    user_socket:send_message(UserID, ?RPL_YOURHOST(Nick, MyHost, "irce-" ++ Version)),
+    user_socket:send_message(UserID, ?RPL_YOURHOST(Nick, ?SERVERHOST, "irce-" ++ Version)),
     % it is not the time it was build, but started
     user_socket:send_message(UserID, ?RPL_CREATED(Nick, uptime_date())),
     spawn(motd_command, run_user, [UserID, []]).
