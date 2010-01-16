@@ -11,7 +11,14 @@ run_user(UserID, [UserName, Mode, _Unused, Real | _Rest]) ->
             #ircuser{user = nil, host = nil, real = nil, nick = Nick} ->
                 Socket = user_socket:get_socket(UserID),
                 Host = get_host(Socket, UserName),
-                NewUser = User#ircuser{user = UserName, host = Host, real = Real},
+                ModeInt = list_to_integer(Mode),
+                Modes = case {ModeInt band 2 == 2, ModeInt band 4 == 4} of
+                    {true, true} -> "iw";
+                    {true, false} -> "i";
+                    {false, true} -> "w";
+                    {false, false} -> ""
+                end,
+                NewUser = User#ircuser{user = UserName, host = Host, real = Real, modes = Modes},
                 case Nick of
                     nil -> ok;
                     _ -> userregistration:for_user(NewUser)

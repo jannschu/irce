@@ -20,6 +20,7 @@ run(Name, Params, UserID) ->
 ?MAP_COMMAND("PING", ping_command);
 
 ?MAP_COMMAND("JOIN", join_command);
+?MAP_COMMAND("MODE", mode_command);
 
 ?MAP_COMMAND("MOTD", motd_command);
 ?MAP_COMMAND("PART", part_command);

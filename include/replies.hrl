@@ -21,6 +21,8 @@
 -define(RPL_MYINFO(Target, ServerName, Version, UserModes, ChannelModes),
     ?RPL("004", [string:join([ServerName, Version, UserModes, ChannelModes])])).
 
+-define(RPL_UMODEIS(Target, Modes), ?RPL("221", [Target, [$+|Modes]])).
+
 -define(RPL_NOTOPIC(Target, Channel), ?RPL("331", [Target, Channel, "No topic is set"])).
 -define(RPL_TOPIC(Target, Channel, Topic), ?RPL("331", [Target, Channel, Topic])).
 
@@ -56,3 +58,6 @@
 
 -define(ERR_NEEDMOREPARAMS(Target, Command), ?RPL("461", [Target, Command, "Not enough parameters"])).
 -define(ERR_ALREADYREGISTRED(Target), ?RPL("462", [Target, "Unauthorized command (already registered)"])).
+
+-define(ERR_UMODEUNKNOWNFLAG(Target), ?RPL("501", [Target, "Unknown MODE flag"])).
+-define(ERR_USERSDONTMATCH(Target), ?RPL("502", [Target, "Cannot change mode for other users"])).
