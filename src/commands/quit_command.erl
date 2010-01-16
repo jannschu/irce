@@ -20,8 +20,11 @@ broadcast_quit(UserID, Msg) ->
         _ ->
             ?MSG_FROM(User, "QUIT", [Msg])
     end,
-    {ok, Channels} = ircchannels:get_channel_with_user(UserID),
-    send_to_users_in_channel(Channels, QuitMsg, UserID).
+    case ircchannels:get_channel_with_user(UserID) of
+        {ok, Channels} ->
+            send_to_users_in_channel(Channels, QuitMsg, UserID);
+        {error, not_found} -> ok
+    end.
 
 send_to_users_in_channel(Channels, QuitMsg, From) ->
     send_to_users_in_channel(Channels, QuitMsg, From, sets:new()).
